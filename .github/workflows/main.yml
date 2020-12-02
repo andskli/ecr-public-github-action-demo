@@ -1,0 +1,36 @@
+name: build and publish image
+on: push
+
+jobs:
+  push_to_registry:
+    name: push image to ECR public
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        id: aws_creds
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }} 
+      - name: Get ECR password
+        id: ecr_login
+        run: |
+          ECR_PASSWORD="$(docker run -ti --rm -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli ecr-public get-login-password)"
+          echo "::add-mask::$ECR_PASSWORD"
+          echo "::set-output name=ecr-login-password::$ECR_PASSWORD"
+      - name: Login to ECR public
+        uses: docker/login-action@v1
+        with:
+          username: AWS
+          password: ${{ steps.ecr_login.outputs.ecr-login-password }}
+          registry: public.ecr.aws
+      - name: Build, tag, and push image to Amazon ECR
+        uses: 
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t public.ecr.aws/f8u6t4e3/ecr-public-github-action-demo:$IMAGE_TAG .
+          docker push public.ecr.aws/f8u6t4e3/ecr-public-github-action-demo:$IMAGE_TAG
