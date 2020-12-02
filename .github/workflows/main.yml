@@ -28,7 +28,6 @@ jobs:
           password: ${{ steps.ecr_login.outputs.ecr-login-password }}
           registry: public.ecr.aws
       - name: Build, tag, and push image to Amazon ECR
-        uses: 
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
