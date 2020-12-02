@@ -18,7 +18,7 @@ jobs:
       - name: Get ECR password
         id: ecr_login
         run: |
-          ECR_PASSWORD="$(docker run -ti --rm -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli ecr-public get-login-password)"
+          ECR_PASSWORD="$(docker run -i --rm -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli ecr-public get-login-password)"
           echo "::add-mask::$ECR_PASSWORD"
           echo "::set-output name=ecr-login-password::$ECR_PASSWORD"
       - name: Login to ECR public
